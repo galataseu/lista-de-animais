@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enciclopédia Animal</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      position: relative;
+      z-index: 0;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('background.jpeg');
+      background-size: 500px;
+      background-repeat: repeat;
+      opacity: 0.15;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    h1.title {
+      font-size: 2.5rem;
+      font-weight: bold;
+      text-align: center;
+      background: linear-gradient(to right, #a8dadc, #ffd166, #b7e4c7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 2rem;
+      transition: transform 0.3s ease;
+    }
+
+    h1.title:hover {
+      transform: scale(1.03);
+    }
+
+    .imagem-container {
+      position: relative;
+      width: 100%;
+      height: 250px;
+      overflow: hidden;
+      border-radius: 10px;
+      transition: transform 0.3s ease;
+    }
+
+    .imagem-container:hover {
+      transform: scale(1.02);
+    }
+
+    .imagem-container::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: var(--imagem-url);
+      background-size: cover;
+      background-position: center;
+      filter: blur(12px) brightness(0.8);
+      z-index: 0;
+    }
+
+    .imagem-container img {
+      position: relative;
+      z-index: 1;
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      padding: 10px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .imagem-container img:hover {
+      transform: scale(1.05);
+    }
+
+    .card.animal-card {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.5s forwards;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .btn {
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+    }
+
+    .btn-success {
+      background-color: #80ed99;
+      border: none;
+    }
+
+    .btn-success:hover {
+      background-color: #57cc99;
+    }
+
+    .btn-warning {
+      background-color: #ffd166;
+      border: none;
+    }
+
+    .btn-warning:hover {
+      background-color: #fcbf49;
+    }
+
+    .btn-danger {
+      background-color: #ef476f;
+      border: none;
+    }
+
+    .btn-danger:hover {
+      background-color: #d62839;
+    }
+
+    .form-control,
+    textarea {
+      background-color: #f7fff7;
+    }
+
+    #imagemModal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.85);
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    #imagemModal.aberto {
+      display: flex;
+      opacity: 1;
+    }
+
+    #imagemModal img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 8px;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+      animation: zoomIn 0.3s ease;
+    }
+
+    @keyframes zoomIn {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    #fecharModal {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 2rem;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container my-5">
+    <h1 class="title">🐾 Enciclopédia Animal</h1>
+
+    <div class="card mb-5">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-plus-circle"></i> Novo Animal</h5>
+        <form id="animalForm">
+          <input type="hidden" id="editIndex" value="">
+          <div class="mb-3">
+            <label for="animalNome" class="form-label">Nome</label>
+            <input type="text" class="form-control" id="animalNome" required>
+          </div>
+          <div class="mb-3">
+            <label for="animalDescricao" class="form-label">Descrição</label>
+            <textarea class="form-control" id="animalDescricao" rows="2" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="animalImagem" class="form-label">URL da Imagem</label>
+            <input type="url" class="form-control" id="animalImagem" required>
+          </div>
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-check-circle-fill"></i> Salvar
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div id="listaAnimais" class="row gy-4"></div>
+  </div>
+
+  <div id="imagemModal">
+    <span id="fecharModal">&times;</span>
+    <img id="imagemModalConteudo" src="" alt="Imagem em tela cheia">
+  </div>
+
+  <script>
+    const form = document.getElementById('animalForm');
+    const listaAnimais = document.getElementById('listaAnimais');
+    const editIndexInput = document.getElementById('editIndex');
+
+    let animais = JSON.parse(localStorage.getItem('animais')) || [];
+
+    function salvarNoLocalStorage() {
+      localStorage.setItem('animais', JSON.stringify(animais));
+    }
+
+    function renderizarAnimais() {
+      listaAnimais.innerHTML = '';
+      animais.forEach((animal, index) => {
+        const card = document.createElement('div');
+        card.className = 'col-md-4';
+        card.innerHTML = `
+          <div class="card animal-card shadow-sm h-100">
+            <div class="imagem-container" style="--imagem-url: url('${animal.imagem}')">
+              <img src="${animal.imagem}" alt="${animal.nome}" onclick="abrirImagemModal('${animal.imagem}')">
+            </div>
+            <div class="card-body d-flex flex-column justify-content-between">
+              <div>
+                <h5 class="card-title">${animal.nome}</h5>
+                <p class="card-text">${animal.descricao}</p>
+              </div>
+              <div class="mt-2 d-flex justify-content-end gap-2">
+                <button class="btn btn-warning btn-sm" onclick="editarAnimal(${index})">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="removerAnimal(${index})">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        listaAnimais.appendChild(card);
+      });
+    }
+
+    function removerAnimal(index) {
+      animais.splice(index, 1);
+      salvarNoLocalStorage();
+      renderizarAnimais();
+    }
+
+    function editarAnimal(index) {
+      const animal = animais[index];
+      document.getElementById('animalNome').value = animal.nome;
+      document.getElementById('animalDescricao').value = animal.descricao;
+      document.getElementById('animalImagem').value = animal.imagem;
+      editIndexInput.value = index;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const nome = document.getElementById('animalNome').value.trim();
+      const descricao = document.getElementById('animalDescricao').value.trim();
+      const imagem = document.getElementById('animalImagem').value.trim();
+      const editIndex = editIndexInput.value;
+
+      if (!nome || !descricao || !imagem) return;
+
+      if (editIndex === '') {
+        animais.push({ nome, descricao, imagem });
+      } else {
+        animais[editIndex] = { nome, descricao, imagem };
+        editIndexInput.value = '';
+      }
+
+      salvarNoLocalStorage();
+      renderizarAnimais();
+      form.reset();
+    });
+
+    const imagemModal = document.getElementById('imagemModal');
+    const imagemModalConteudo = document.getElementById('imagemModalConteudo');
+    const fecharModal = document.getElementById('fecharModal');
+
+    function abrirImagemModal(src) {
+      imagemModalConteudo.src = src;
+      imagemModal.classList.add('aberto');
+    }
+
+    fecharModal.onclick = () => {
+      imagemModal.classList.remove('aberto');
+    };
+
+    imagemModal.onclick = (e) => {
+      if (e.target === imagemModal) {
+        imagemModal.classList.remove('aberto');
+      }
+    };
+
+    renderizarAnimais();
+  </script>
+</body>
+
+</html>
