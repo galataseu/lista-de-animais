@@ -5,28 +5,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Lista com LocalStorage + Bootstrap</title>
-    <!-- Bootstrap CSS CDN -->
     <style>
-        /* Modo escuro */
         body.dark-mode {
             background-color: #121212 !important;
             color: #eee;
         }
 
-        /* Ajusta o fundo do container no modo escuro */
         body.dark-mode .container {
             background-color: #1e1e1e;
             border-radius: 8px;
         }
 
-        /* Lista modo escuro */
         body.dark-mode .list-group-item {
             background-color: #2c2c2c;
             color: #ddd;
             border-color: #444;
         }
 
-        /* Botões no modo escuro */
         body.dark-mode .btn-success {
             background-color: #388e3c;
             border-color: #2e7d32;
@@ -36,6 +31,33 @@
             background-color: #555;
             border-color: #444;
             color: #ddd;
+        }
+
+        body.yellow-mode {
+            background-color: #ffe1a1 !important;
+            color: #2b211a;
+        }
+
+        body.yellow-mode .container {
+            background-color: #ffd588;
+            border-radius: 8px;
+        }
+
+        body.yellow-mode .list-group-item {
+            background-color: #ffe2a4;
+            color: #2b231e;
+            border-color: #ff9838;
+        }
+
+        body.yellow-mode .btn-success {
+            background-color: #388e3c;
+            border-color: #2e7d32;
+        }
+
+        body.yellow-mode .btn-secondary {
+            background-color: #ff9148;
+            border-color: #e97038;
+            color: #30241d;
         }
     </style>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -49,46 +71,49 @@
 
         <div class="row justify-content-center mb-3">
             <div class="col-12 col-md-6">
-                <!-- Input com classe do Bootstrap -->
                 <input type="text" id="itemInput" class="form-control" placeholder="Digite um item..." />
             </div>
             <div class="col-auto">
-                <!-- Botões com estilo Bootstrap -->
                 <button id="addButton" class="btn btn-success me-2">Adicionar</button>
-                <button id="modo" class="btn btn-secondary"></button>
+                <button id="modo" class="btn btn-secondary me-2"></button>
+                <button id="modo2" class="btn btn-secondary me-2"></button>
+                <button id="clickButton" class="btn btn-primary">Contar Click</button>
             </div>
         </div>
 
-        <!-- Contador de itens -->
-        <p class="text-center fs-5">Total de itens: <span id="contador">0</span></p>
+        <!-- Contador de cliques -->
+        <p class="text-center fs-5">Total de cliques: <span id="contador">0</span></p>
 
-        <!-- Lista estilizada pelo Bootstrap -->
         <ul id="itemList" class="list-group mx-auto" style="max-width: 600px;">
-            <!-- Os itens serão adicionados aqui -->
+            <!-- Itens da lista -->
         </ul>
 
     </div>
 
-    <!-- Bootstrap JS Bundle (Popper + Bootstrap JS) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         const itemInput = document.getElementById('itemInput');
         const addButton = document.getElementById('addButton');
+        const clickButton = document.getElementById('clickButton');
         const itemList = document.getElementById('itemList');
         const modoBtn = document.getElementById('modo');
+        const modo2Btn = document.getElementById('modo2');
         let contador = parseInt(localStorage.getItem('contador')) || 0;
 
-        window.addEventListener('load', () => {
-            const savedItems = JSON.parse(localStorage.getItem('lista')) || [];
-            atualizarContador();
-            savedItems.forEach(item => addItemToDOM(item));
-        });
-
+        // Atualiza o contador de cliques
         function atualizarContador() {
             document.getElementById('contador').textContent = contador;
         }
 
+        // Clique no botão de contar
+        clickButton.addEventListener('click', () => {
+            contador++;
+            localStorage.setItem('contador', contador);
+            atualizarContador();
+        });
+
+        // Clique para adicionar item na lista
         addButton.addEventListener('click', () => {
             const value = itemInput.value.trim();
             if (value === '') return;
@@ -96,16 +121,17 @@
             addItemToDOM(value);
             saveItem(value);
             itemInput.value = '';
+        });
 
-            contador++;
-            localStorage.setItem('contador', contador);
-            atualizarContador();
+        // Adiciona item com a tecla Enter
+        itemInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                addButton.click(); // Reaproveita o mesmo código do botão
+            }
         });
 
         modoBtn.addEventListener('click', () => {
             document.body.classList.toggle('dark-mode');
-
-            // Atualiza o texto do botão conforme o modo
             if (document.body.classList.contains('dark-mode')) {
                 modoBtn.textContent = 'Modo Claro';
                 localStorage.setItem('modo', 'escuro');
@@ -115,25 +141,91 @@
             }
         });
 
-        // Carrega modo salvo no localStorage
-        window.addEventListener('load', () => {
-            if (localStorage.getItem('modo') === 'escuro') {
-                document.body.classList.add('dark-mode');
-                modoBtn.textContent = 'Modo Claro';
+        modo2Btn.addEventListener('click', () => {
+            document.body.classList.toggle('yellow-mode');
+            if (document.body.classList.contains('yellow-mode')) {
+                if (document.body.classList.contains('dark-mode')) {
+                    modo2Btn.textContent = 'Modo Escuro';
+                    localStorage.setItem('modo', 'escuro');
+                } else {
+                    modo2Btn.textContent = 'Modo Claro';
+                    localStorage.setItem('modo', 'claro');
+                } 
+                localStorage.setItem('modo', 'amarelo');
+            }
+            else {
+                modo2Btn.textContent = 'Modo Amarelo';
+                localStorage.setItem('modo', 'claro');
             }
         });
 
-        // Aqui, adiciona o item já com classe Bootstrap para estilizar a lista
+        // Carregamento inicial
+        window.addEventListener('load', () => {
+            atualizarContador();
+            const savedItems = JSON.parse(localStorage.getItem('lista')) || [];
+            savedItems.forEach(item => addItemToDOM(item));
+
+            if (localStorage.getItem('modo') === 'escuro') {
+                document.body.classList.add('dark-mode');
+                modoBtn.textContent = 'Modo Claro';
+            } else {
+                modoBtn.textContent = 'Modo Escuro';
+            }
+
+            if (localStorage.getItem('modo') === 'amarelo') {
+                document.body.classList.add('yellow-mode');
+                if (modoBtn.textContent === 'Modo Claro') {
+                    modo2Btn.textContent = 'Modo Escuro';
+                } if (modoBtn.textContent === 'Modo Escuro') {
+                    modo2Btn.textContent = 'Modo Claro';
+                }
+            } else {
+                modo2Btn.textContent = 'Modo Amarelo';
+            }
+        });
+
+        // Função para adicionar item ao DOM
         function addItemToDOM(item) {
             const li = document.createElement('li');
-            li.textContent = item;
-            li.classList.add('list-group-item'); // estilo Bootstrap para lista
+            li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+
+            // Texto do item
+            const span = document.createElement('span');
+            span.textContent = item;
+
+            // Botão de exclusão
+            const deleteBtn = document.createElement('button');
+            deleteBtn.classList.add('btn', 'btn-danger', 'btn-sm');
+            deleteBtn.textContent = 'Excluir';
+
+            // Evento de click para excluir
+            deleteBtn.addEventListener('click', () => {
+                deleteItem(item, li);
+            });
+
+            // Adiciona texto e botão ao li
+            li.appendChild(span);
+            li.appendChild(deleteBtn);
+
+            // Adiciona o item à lista
             itemList.appendChild(li);
         }
 
+        // Função para salvar item no localStorage
         function saveItem(item) {
             const savedItems = JSON.parse(localStorage.getItem('lista')) || [];
             savedItems.push(item);
+            localStorage.setItem('lista', JSON.stringify(savedItems));
+        }
+
+        // Função para excluir item
+        function deleteItem(item, li) {
+            // Remove visualmente
+            itemList.removeChild(li);
+
+            // Remove do localStorage
+            let savedItems = JSON.parse(localStorage.getItem('lista')) || [];
+            savedItems = savedItems.filter(i => i !== item);
             localStorage.setItem('lista', JSON.stringify(savedItems));
         }
     </script>
